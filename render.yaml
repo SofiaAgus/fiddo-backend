@@ -5,6 +5,6 @@ services:
     plan: free
     buildCommand: "npm install"
     startCommand: "node index.js"
-    rootDir: "."  # <--- Asegura que use la raíz del proyecto
     branch: main
     autoDeploy: true
+    rootDir: .
