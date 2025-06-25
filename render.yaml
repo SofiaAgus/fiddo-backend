@@ -3,8 +3,7 @@ services:
     name: fiddo-backend
     env: node
     plan: free
-    rootDir: .
-    buildCommand: "npm install"
-    startCommand: "npm start"
+    buildCommand: npm install
+    startCommand: npm start
     branch: main
     autoDeploy: true
