@@ -1,12 +1,16 @@
 {
   "name": "fiddo-backend",
   "version": "1.0.0",
-  "description": "Backend de Fiddo para enviar mensajes por WhatsApp",
+  "description": "Backend de Fiddo para recibir mensajes de Twilio WhatsApp",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "axios": "^1.6.0"
+    "axios": "^1.6.8",
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
