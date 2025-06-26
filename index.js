@@ -17,16 +17,16 @@ app.post('/webhook', async (req, res) => {
     const message = '👋 ¡Hola! Soy Fiddo, tu avisador de turnos 😉';
 
     try {
-      await axios.post('https://api.twilio.com/2010-04-01/Accounts/' + process.env.TWILIO_ACCOUNT_SID + '/Messages.json', new URLSearchParams({
-        To: from,
-        From: process.env.TWILIO_PHONE_NUMBER,
-        Body: message
-      }), {
-        auth: {
-          username: process.env.TWILIO_ACCOUNT_SID,
-          password: process.env.TWILIO_AUTH_TOKEN
-        }
-      });
+  await axios.post('https://api.twilio.com/2010-04-01/Accounts/' + process.env.TWILIO_ACCOUNT_SID + '/Messages.json', new URLSearchParams({
+  To: from,
+  From: 'whatsapp:+14155238886',
+  Body: message
+}), {
+  auth: {
+    username: process.env.TWILIO_ACCOUNT_SID,
+    password: process.env.TWILIO_AUTH_TOKEN
+  }
+});
 
       console.log('Respuesta enviada correctamente a:', from);
     } catch (error) {
