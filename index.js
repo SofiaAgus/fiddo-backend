@@ -27,22 +27,30 @@ app.post('/webhook', async (req, res) => {
     let message;
 
     if (saludosReconocidos.includes(texto)) {
-      message = '👋 ¡Hola! Soy Fiddo, tu avisador de turnos 😉\n¿Querés arrancar?\n1️⃣ Configurar perfil\n2️⃣ Crear alerta rápida';
+      message = `👋 ¡Hola, Bienvenido! Soy Fiddo, el avisador de turnos que a VOS te interesan 😉\n\n` +
+                `1️⃣ Configuración de perfil\n` +
+                `2️⃣ Definir una alerta sin guardar perfil\n` +
+                `3️⃣ Tengo Código Fiddo\n` +
+                `📩 Respondé con el número de la opción`;
     } else {
-      message = '🤖 No entendí ese mensaje. Podés escribirme "Hola" para comenzar.';
+      message = '🤖 No entendí ese mensaje. Escribí "Hola" para comenzar.';
     }
 
     try {
-      await axios.post('https://api.twilio.com/2010-04-01/Accounts/' + process.env.TWILIO_ACCOUNT_SID + '/Messages.json', new URLSearchParams({
-        To: from,
-        From: 'whatsapp:+14155238886',
-        Body: message
-      }), {
-        auth: {
-          username: process.env.TWILIO_ACCOUNT_SID,
-          password: process.env.TWILIO_AUTH_TOKEN
+      await axios.post(
+        `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`,
+        new URLSearchParams({
+          To: from,
+          From: 'whatsapp:+14155238886',
+          Body: message
+        }),
+        {
+          auth: {
+            username: process.env.TWILIO_ACCOUNT_SID,
+            password: process.env.TWILIO_AUTH_TOKEN
+          }
         }
-      });
+      );
 
       console.log('Respuesta enviada correctamente a:', from);
     } catch (error) {
