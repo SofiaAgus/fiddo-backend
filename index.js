@@ -47,7 +47,6 @@ app.post('/twilio', async (req, res) => {
 
   let respuesta = '';
 
-
 if (mensaje === 'hola' || mensaje === 'cancelar') {
   await reiniciarSesion(numero);
   const nuevaSesion = obtenerSesion(numero);
