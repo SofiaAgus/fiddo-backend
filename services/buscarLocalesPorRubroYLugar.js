@@ -43,6 +43,9 @@ async function buscarLocalesPorRubroYLugar(rubro, lugar) {
 
   } catch (error) {
     console.error('❌ Error en buscarLocalesPorRubroYLugar:', error);
+    console.log('🔍 Buscando rubro:', rubro);
+console.log('📍 Buscando localidad/zona:', lugar);
+console.log('🧪 Total resultados encontrados:', resultados.length);
     return [];
   }
 }
