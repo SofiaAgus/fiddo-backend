@@ -53,6 +53,7 @@ if (mensaje === 'hola' || mensaje === 'cancelar') {
 
   if (usuario && usuario.tipo === 'nuevo') {
     await actualizarSesion(numero, { estado: 'esperando_codigo' });
+    sesion = obtenerSesion(numero);
     respuesta = mensajeDeBienvenida;
   } else if (usuario && usuario.tipo === 'recurrente') {
     await actualizarSesion(numero, { estado: 'menu_usuario_recurrente' });
@@ -61,6 +62,7 @@ if (mensaje === 'hola' || mensaje === 'cancelar') {
   } else {
     // Usuario no encontrado, se lo trata como nuevo
     await actualizarSesion(numero, { estado: 'esperando_codigo' });
+    sesion = obtenerSesion(numero);
     respuesta = mensajeDeBienvenida;
   }
 
@@ -140,6 +142,9 @@ if (mensaje === 'hola' || mensaje === 'cancelar') {
       return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
 
     case 'esperando_codigo': {
+      console.log('🟢 Entró en estado esperando_codigo');
+console.log('📩 Mensaje recibido en esperando_codigo:', mensaje);
+console.log('🧠 Sesión actual:', sesion);
       const usuario = await Usuario.findOne({ telefono: numero });
       if (usuario && usuario.tipo === 'recurrente') {
         await actualizarSesion(numero, { estado: 'menu_usuario_recurrente' });
