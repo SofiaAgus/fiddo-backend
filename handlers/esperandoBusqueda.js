@@ -13,8 +13,35 @@ module.exports = async function manejarBusqueda(mensaje, numero, sesion) {
     let lugar = '';
     let resultados = [];
 
-    // 👉 Solo ejecutamos interpretarZonaRubro si NO es búsqueda por nombre
-    if (!sesion.buscarPorNombre) {
+    // 🧠 1. Si buscarPorNombre está activo, primero intento por nombre
+    if (sesion.buscarPorNombre) {
+      const posiblesAliados = await interpretarAliado(mensaje);
+      console.log('🧪 posiblesAliados detectados:', posiblesAliados?.map(a => a.nombre));
+
+      if (posiblesAliados && posiblesAliados.length > 0) {
+        if (posiblesAliados.length === 1) {
+          const aliado = posiblesAliados[0];
+          sesion.localesSeleccionados = [aliado.nombre];
+          sesion.rubro = aliado.rubro || 'Aliado';
+          sesion.zona = aliado.zona || 'Zona no especificada';
+          sesion.estado = 'esperando_horarios';
+          await actualizarSesion(numero, sesion);
+
+          return `📍 ${aliado.nombre}
+ℹ️ Este local ${aliado.codigoFiddo ? 'tiene perfil completo' : 'no cuenta con perfil premium'}.
+
+✍️ Definamos día y hora para tu alerta: 
+(Ej: "lunes después de las 18" o "miércoles 13 a 17")`;
+        }
+
+        resultados = [{ zona: 'sin especificar', locales: posiblesAliados }];
+        rubro = 'Aliado';
+        lugar = 'por nombre';
+      }
+    }
+
+    // 🧠 2. Si no encontró por nombre, intenta zona + rubro igual
+    if (resultados.length === 0) {
       const interpretacion = await interpretarZonaRubro(mensaje) || {};
       rubro = interpretacion.rubro || '';
       lugar = interpretacion.localidad || interpretacion.zona || '';
@@ -25,57 +52,16 @@ module.exports = async function manejarBusqueda(mensaje, numero, sesion) {
       }
     }
 
-    // 🧠 Si no hay rubro+zona detectados o no hubo resultados, intentamos por nombre
-    if (resultados.length === 0) {
-      console.log("🔍 Intentando interpretar como nombre directo:", mensaje);
-      const posiblesAliados = await interpretarAliado(mensaje);
-      console.log("🧪 posiblesAliados detectados:", posiblesAliados?.map(a => a.nombre));
-
-      if (posiblesAliados && posiblesAliados.length > 0) {
-        sesion.buscarPorNombre = true;
-
-        if (posiblesAliados.length === 1) {
-          const aliado = posiblesAliados[0];
-          sesion.localesSeleccionados = [aliado.nombre];
-          sesion.rubro = aliado.rubro || 'Aliado';
-          sesion.zona = aliado.zona || 'Zona no especificada';
-          sesion.estado = 'esperando_horarios';
-          await actualizarSesion(numero, sesion);
-
-          if (aliado.codigoFiddo) {
-            return `Fiddo:
-📍 ${aliado.nombre}
-📌 Perfil del local:
-🏟️ ${aliado.direccion || 'Dirección no informada'} – ${aliado.localidad}, ${aliado.partido}, ${aliado.zona}
-📞 Contacto: ${aliado.contacto || 'no informado'}
-⭐ Reputación: ${aliado.reputacion || 'Sin calificación'}
-🎁 Promos: ${(aliado.promociones && aliado.promociones.length > 0) ? aliado.promociones.join(' – ') : 'Sin promociones'}
-
-✍️ Definamos día y hora para tu alerta: 
-“Ej: lunes después de las 18” o “miércoles 13 a 17”`;
-          } else {
-            return `📍 ${aliado.nombre}
-ℹ️ Este local no cuenta con perfil premium. Solo podés configurar alertas de disponibilidad.
-
-✍️ Definamos día y hora para tu alerta: 
-“Ej: lunes después de las 18” o “miércoles 13 a 17”`;
-          }
-        }
-
-        resultados = [{ zona: 'sin especificar', locales: posiblesAliados }];
-        rubro = 'Aliado';
-        lugar = 'por nombre';
-      }
-    }
-
+    // ⚠️ 3. Si sigue sin resultados, mensaje de ayuda
     if (!rubro || !lugar || resultados.length === 0) {
       if (sesion.buscarPorNombre) {
-        return '😕 No entendí bien. Escribime el nombre del Aliado que estás buscando.\n(Ej: "El Bosque Padel" o "Dr. Alejandro López")';
+        return '😕 No encontré coincidencias. Escribime el nombre del Aliado que estás buscando.\n(Ej: "El Bosque Padel" o "Dr. Alejandro López")';
       } else {
-        return '😕 No entendí bien. Escribime algo como: “padel en Martínez” o “una peluquería por Palermo”.';
+        return '😕 No encontré coincidencias. Escribime algo como: “padel en Martínez” o “una peluquería por Palermo”.';
       }
     }
 
+    // 🎯 4. Si hay solo uno, avanza a horarios
     const todosLosLocalesPlano = resultados.flatMap(grupo => grupo.locales);
     if (todosLosLocalesPlano.length === 1) {
       const local = todosLosLocalesPlano[0];
@@ -85,26 +71,14 @@ module.exports = async function manejarBusqueda(mensaje, numero, sesion) {
       sesion.estado = 'esperando_horarios';
       await actualizarSesion(numero, sesion);
 
-      if (local.codigoFiddo) {
-        return `Fiddo:
-📍 ${local.nombre}
-📌 Perfil del local:
-🏟️ ${local.direccion || 'Dirección no informada'} – ${local.localidad}, ${local.partido}, ${local.zona}
-📞 Contacto: ${local.contacto || 'no informado'}
-⭐ Reputación: ${local.reputacion || 'Sin calificación'}
-🎁 Promos: ${(local.promociones && local.promociones.length > 0) ? local.promociones.join(' – ') : 'Sin promociones'}
+      return `📍 ${local.nombre}
+ℹ️ Este local ${local.codigoFiddo ? 'tiene perfil completo' : 'no cuenta con perfil premium'}.
 
 ✍️ Definamos día y hora para tu alerta: 
-“Ej: lunes después de las 18” o “miércoles 13 a 17”`;
-      } else {
-        return `📍 ${local.nombre}
-ℹ️ Este local no cuenta con perfil premium. Solo podés configurar alertas de disponibilidad.
-
-✍️ Definamos día y hora para tu alerta: 
-“Ej: lunes después de las 18” o “miércoles 13 a 17”`;
-      }
+(Ej: "lunes después de las 18" o "miércoles 13 a 17")`;
     }
 
+    // 🔢 5. Si hay varios, los muestra para elegir
     const nombresSet = new Set();
     const todosLosLocales = resultados.flatMap(grupo => grupo.locales)
       .filter(local => {
