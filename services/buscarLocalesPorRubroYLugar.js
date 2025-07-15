@@ -14,6 +14,8 @@ async function buscarLocalesPorRubroYLugar(rubro, lugar) {
     const regexRubro = new RegExp(normalizarTexto(rubro), 'i');
     const regexLugar = new RegExp(normalizarTexto(lugar), 'i');
 
+    console.log("🔎 Filtro rubro:", regexRubro);
+    console.log("🔎 Filtro localidad:", regexLugar);
     const locales = await Local.find({
       rubro: { $regex: regexRubro },
       localidad: { $regex: regexLugar },
