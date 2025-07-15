@@ -35,18 +35,18 @@ app.use(bodyParser.json());
 connectDB();
 
 app.post('/twilio', async (req, res) => {
-  console.log('📩 Nuevo mensaje recibido:', mensaje);
-console.log('📱 De número:', numero);
-let sesion = obtenerSesion(numero);
-console.log('📦 Estado actual de la sesión:', sesion.estado);
-  console.log('📩 Body completo:', req.body);
-
   const mensaje = (req.body.Body || '').trim().toLowerCase();
   const numero = req.body.From;
-  console.log('📩 Mensaje recibido:', mensaje);
-  sesion = obtenerSesion(numero); // sin el "let"
-  console.log('🔁 Estado actual de sesión:', sesion.estado);
+
+  console.log('📩 Nuevo mensaje recibido:', mensaje);
+  console.log('📱 De número:', numero);
+  console.log('📩 Body completo:', req.body);
+
+  let sesion = obtenerSesion(numero);
+  console.log('📦 Estado actual de la sesión:', sesion.estado);
+
   let respuesta = '';
+
 
 if (mensaje === 'hola' || mensaje === 'cancelar') {
   await reiniciarSesion(numero);
