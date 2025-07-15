@@ -35,6 +35,10 @@ app.use(bodyParser.json());
 connectDB();
 
 app.post('/twilio', async (req, res) => {
+  console.log('📩 Nuevo mensaje recibido:', mensaje);
+console.log('📱 De número:', numero);
+let sesion = obtenerSesion(numero);
+console.log('📦 Estado actual de la sesión:', sesion.estado);
   console.log('📩 Body completo:', req.body);
 
   const mensaje = (req.body.Body || '').trim().toLowerCase();
@@ -144,6 +148,7 @@ if (mensaje === 'hola' || mensaje === 'cancelar') {
     case 'esperando_codigo': {
       console.log('🟢 Entró en estado esperando_codigo');
 console.log('📩 Mensaje recibido en esperando_codigo:', mensaje);
+console.log('🟡 Entró en esperando_codigo con mensaje:', mensaje);
 console.log('🧠 Sesión actual:', sesion);
       const usuario = await Usuario.findOne({ telefono: numero });
       if (usuario && usuario.tipo === 'recurrente') {
@@ -173,6 +178,7 @@ console.log('🧠 Sesión actual:', sesion);
     }
 
     case 'esperando_busqueda':
+      console.log('🔍 Entró en esperando_busqueda con mensaje:', mensaje);
       respuesta = await manejarBusqueda(mensaje, numero, sesion);
       return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
 
