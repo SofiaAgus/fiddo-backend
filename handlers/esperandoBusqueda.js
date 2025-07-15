@@ -45,14 +45,20 @@ module.exports = async function manejarBusqueda(mensaje, numero, sesion) {
       console.log("🧠 Interpretación de zona y rubro:", interpretacion);
       console.log("🎯 Rubro interpretado:", rubro);
       console.log("📍 Lugar interpretado:", lugar);
-      const interpretacion = await interpretarZonaRubro(mensaje) || {};
-      rubro = interpretacion.rubro || '';
-      lugar = interpretacion.localidad || interpretacion.zona || '';
+  const interpretacion = await interpretarZonaRubro(mensaje) || {};
+rubro = interpretacion.rubro || '';
+lugar = interpretacion.localidad || interpretacion.zona || '';
 
-      if (rubro && lugar) {
-        resultados = await buscarLocalesPorRubroYLugar(rubro, lugar);
-        sesion.buscarPorNombre = false;
-      }
+console.log("✅ Interpretación correcta:");
+console.log("🎯 Rubro:", rubro);
+console.log("📍 Lugar:", lugar);
+
+if (rubro && lugar) {
+  resultados = await buscarLocalesPorRubroYLugar(rubro, lugar);
+  console.log('🔎 Resultados encontrados:', resultados.flatMap(r => r.locales).map(l => l.nombre));
+  sesion.buscarPorNombre = false;
+}
+
     }
 
     // ⚠️ 3. Si sigue sin resultados, mensaje de ayuda
