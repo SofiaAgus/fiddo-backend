@@ -43,40 +43,29 @@ app.post('/twilio', async (req, res) => {
   console.log('🔁 Estado actual de sesión:', sesion.estado);
   let respuesta = '';
 
-  if (mensaje === 'hola' || mensaje === 'cancelar') {
-    const aliado = await verificarSiEsAliado(numero);
-    await reiniciarSesion(numero);
+if (mensaje === 'hola' || mensaje === 'cancelar') {
+  await reiniciarSesion(numero);
+  const nuevaSesion = obtenerSesion(numero);
+  sesion = nuevaSesion;
+
+  const usuario = await Usuario.findOne({ telefono: numero });
+
+  if (usuario && usuario.tipo === 'nuevo') {
+    await actualizarSesion(numero, { estado: 'esperando_codigo' });
+    respuesta = mensajeDeBienvenida;
+  } else if (usuario && usuario.tipo === 'recurrente') {
+    await actualizarSesion(numero, { estado: 'menu_usuario_recurrente' });
     const nuevaSesion = obtenerSesion(numero);
-    sesion = nuevaSesion;
-
-    if (aliado) {
-      await actualizarSesion(numero, {
-        estado: 'menu_aliado',
-        esAliado: true,
-        localesSeleccionados: [aliado.nombre]
-      });
-
-      respuesta = `👋 ¡Hola ${aliado.nombre}! Este es tu panel de gestión en Fiddo 🛠️\n\n1️⃣ Cargar promoción\n2️⃣ Ver estadísticas (próximamente)\n3️⃣ Editar mis datos\n\n📌 Escribí el número de la opción que quieras usar.`;
-    } else {
-      const usuario = await Usuario.findOne({ telefono: numero });
-
-      if (usuario && usuario.tipo === 'nuevo') {
-        await actualizarSesion(numero, { estado: 'esperando_codigo' });
-        respuesta = require('./messages/bienvenida');
-        console.log('✅ Se cargó mensaje de bienvenida:', respuesta);
-      } else if (usuario && usuario.tipo === 'recurrente') {
-        await actualizarSesion(numero, { estado: 'menu_usuario_recurrente' });
-        const nuevaSesion = obtenerSesion(numero);
-        respuesta = await manejarMenuUsuarioRecurrente(mensaje, numero, nuevaSesion);
-      } else {
-        await actualizarSesion(numero, { estado: 'esperando_codigo' });
-        respuesta = require('./messages/bienvenida');
-      }
-
-    }
-
-    return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
+    respuesta = await manejarMenuUsuarioRecurrente(mensaje, numero, nuevaSesion);
+  } else {
+    // Usuario no encontrado, se lo trata como nuevo
+    await actualizarSesion(numero, { estado: 'esperando_codigo' });
+    respuesta = mensajeDeBienvenida;
   }
+
+  return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
+}
+
 
   if (mensaje === 'volver') {
     respuesta = await manejarVolver(sesion, numero);
