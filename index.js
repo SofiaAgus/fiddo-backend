@@ -216,5 +216,18 @@ app.post('/twilio', async (req, res) => {
   res.set('Content-Type', 'text/xml');
   console.log('📤 Respuesta enviada:', respuesta);
   res.send(`<Response><Message>${respuesta}</Message></Response>`);
+
+  // --- Solo para que Render detecte un puerto abierto ---
+const http = require('http');
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('Fiddo backend running');
+});
+
+server.listen(process.env.PORT || 3000, () => {
+  console.log(`🟢 Fiddo backend escuchando en puerto ${process.env.PORT || 3000}`);
+});
+
 });
 
