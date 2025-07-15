@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const connectDB = require('./db/connect');
 const { obtenerSesion, actualizarSesion, reiniciarSesion } = require('./session/sessionManager');
+const mensajeDeBienvenida = require('./messages/bienvenida');
 const manejarCodigo = require('./handlers/esperandoCodigo');
 const manejarInicio = require('./manejarInicio');
 const modificarAlerta = require('./handlers/modificarAlerta');
