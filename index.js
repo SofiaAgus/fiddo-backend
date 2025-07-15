@@ -44,7 +44,7 @@ console.log('📦 Estado actual de la sesión:', sesion.estado);
   const mensaje = (req.body.Body || '').trim().toLowerCase();
   const numero = req.body.From;
   console.log('📩 Mensaje recibido:', mensaje);
-  let sesion = obtenerSesion(numero);
+  sesion = obtenerSesion(numero); // sin el "let"
   console.log('🔁 Estado actual de sesión:', sesion.estado);
   let respuesta = '';
 
