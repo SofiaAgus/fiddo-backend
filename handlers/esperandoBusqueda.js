@@ -45,13 +45,14 @@ module.exports = async function manejarBusqueda(mensaje, numero, sesion) {
       console.log("🧠 Interpretación de zona y rubro:", interpretacion);
       console.log("🎯 Rubro interpretado:", rubro);
       console.log("📍 Lugar interpretado:", lugar);
-  const interpretacion = await interpretarZonaRubro(mensaje) || {};
+const interpretacion = await interpretarZonaRubro(mensaje) || {};
 rubro = interpretacion.rubro || '';
 lugar = interpretacion.localidad || interpretacion.zona || '';
 
-console.log("✅ Interpretación correcta:");
-console.log("🎯 Rubro:", rubro);
-console.log("📍 Lugar:", lugar);
+console.log("🧠 Interpretación de zona y rubro:", interpretacion);
+console.log("🎯 Rubro interpretado:", rubro);
+console.log("📍 Lugar interpretado:", lugar);
+
 
 if (rubro && lugar) {
   resultados = await buscarLocalesPorRubroYLugar(rubro, lugar);
