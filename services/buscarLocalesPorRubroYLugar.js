@@ -21,8 +21,11 @@ async function buscarLocalesPorRubroYLugar(rubro, lugar) {
     console.log("🔎 Filtro localidad:", regexLugar);
     const locales = await Local.find({
       rubro: { $regex: regexRubro },
-      localidad: { $regex: regexLugar },
-    codigoFiddo: { $exists: true, $nin: [null, ""] }
+  $or: [
+  { localidad: { $regex: regexLugar } },
+  { zona:      { $regex: regexLugar } },
+  { partido:   { $regex: regexLugar } }
+]
     });
 
     // Agrupar por { localidad, partido, zona }
