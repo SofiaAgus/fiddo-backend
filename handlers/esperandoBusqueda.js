@@ -42,9 +42,6 @@ module.exports = async function manejarBusqueda(mensaje, numero, sesion) {
 
     // 🧠 2. Si no encontró por nombre, intenta zona + rubro igual
     if (resultados.length === 0) {
-      console.log("🧠 Interpretación de zona y rubro:", interpretacion);
-      console.log("🎯 Rubro interpretado:", rubro);
-      console.log("📍 Lugar interpretado:", lugar);
 const interpretacion = await interpretarZonaRubro(mensaje) || {};
 rubro = interpretacion.rubro || '';
 lugar = interpretacion.localidad || interpretacion.zona || '';
