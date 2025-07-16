@@ -144,37 +144,41 @@ if (mensaje === 'hola' || mensaje === 'cancelar') {
       respuesta = await confirmarEliminarAlerta(mensaje, numero, sesion);
       return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
 
-    case 'esperando_codigo': {
-      console.log('🟢 Entró en estado esperando_codigo');
-console.log('📩 Mensaje recibido en esperando_codigo:', mensaje);
-console.log('🟡 Entró en esperando_codigo con mensaje:', mensaje);
-console.log('🧠 Sesión actual:', sesion);
-      const usuario = await Usuario.findOne({ telefono: numero });
-      if (usuario && usuario.tipo === 'recurrente') {
-        await actualizarSesion(numero, { estado: 'menu_usuario_recurrente' });
-        respuesta = await manejarMenuUsuarioRecurrente(mensaje, numero, sesion);
-        return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
-      }
+ case 'esperando_codigo': {
+  console.log('🟢 Entró en estado esperando_codigo');
+  console.log('📩 Mensaje recibido en esperando_codigo:', mensaje);
+  console.log('🟡 Entró en esperando_codigo con mensaje:', mensaje);
+  console.log('🧠 Sesión actual:', sesion);
 
-      if (mensaje === '1') {
-        sesion.estado = 'esperando_busqueda';
-        sesion.buscarPorNombre = false;
-        await actualizarSesion(numero, sesion);
-        respuesta = '📍 Escribime el rubro y zona donde buscás un aliado.\n(Ej: "peluquería en Palermo" o "padel en Olivos")';
-      } else if (mensaje === '2') {
-        sesion.estado = 'esperando_busqueda';
-        sesion.buscarPorNombre = true;
-        await actualizarSesion(numero, sesion);
-        respuesta = '🔎 Escribime el nombre del local o profesional que estás buscando.\n(Ej: "El Bosque Padel" o "Dr. Alejandro López")';
-      } else if (mensaje === 'promos') {
-        sesion.estado = 'esperando_promociones_menu';
-        await actualizarSesion(numero, sesion);
-        respuesta = '🎁 ¿Qué promo te interesa ver hoy? 😎\n(por ejemplo: Peluquerías en Villa Adelina o Tenis en Martínez)';
-      } else {
-        respuesta = await manejarCodigo(mensaje, numero, sesion);
-      }
-      return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
-    }
+  const usuario = await Usuario.findOne({ telefono: numero });
+
+  if (usuario && usuario.tipo === 'recurrente') {
+    await actualizarSesion(numero, { estado: 'menu_usuario_recurrente' });
+    respuesta = await manejarMenuUsuarioRecurrente(mensaje, numero, sesion);
+    return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
+  }
+
+  if (mensaje === '1') {
+    sesion.estado = 'esperando_busqueda';
+    sesion.buscarPorNombre = false;
+    await actualizarSesion(numero, sesion);
+    respuesta = '📍 Escribime el rubro y zona donde buscás un aliado.\n(Ej: "peluquería en Palermo" o "padel en Olivos")';
+  } else if (mensaje === '2') {
+    sesion.estado = 'esperando_busqueda';
+    sesion.buscarPorNombre = true;
+    await actualizarSesion(numero, sesion);
+    respuesta = '🔎 Escribime el nombre del local o profesional que estás buscando.\n(Ej: "El Bosque Padel" o "Dr. Alejandro López")';
+  } else if (mensaje.toLowerCase() === 'promos') {
+    sesion.estado = 'esperando_promociones_menu';
+    await actualizarSesion(numero, sesion);
+    respuesta = '🎁 ¿Qué promo te interesa ver hoy? 😎\n(por ejemplo: Peluquerías en Villa Adelina o Tenis en Martínez)';
+  } else {
+    respuesta = await manejarCodigo(mensaje, numero, sesion);
+  }
+
+  // 🔴 Este return es el que faltaba cuando NO es usuario recurrente
+  return res.set('Content-Type', 'text/xml').send(`<Response><Message>${respuesta}</Message></Response>`);
+}
 
     case 'esperando_busqueda':
       console.log('🔍 Entró en esperando_busqueda con mensaje:', mensaje);
